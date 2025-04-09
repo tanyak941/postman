@@ -1,0 +1,699 @@
+{
+	"info": {
+		"_postman_id": "608f1fd7-d19b-4eeb-af9f-4e5be4875918",
+		"name": "Hilel",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2277284"
+	},
+	"item": [
+		{
+			"name": "Signup",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"",
+							"var userPassword = pm.collectionVariables.replaceIn(\"{{$randomPassword}}\"); ",
+							"pm.collectionVariables.set(\"userPassword\", userPassword);",
+							"",
+							"let randomEmail = pm.collectionVariables.replaceIn(\"{{$randomEmail}}\").toLowerCase();",
+							"pm.collectionVariables.set(\"randomEmailLower\", randomEmail);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let body = pm.response.json();",
+							"console.log(body)",
+							"if (!pm.iterationData.get(\"email\")) {",
+							"    pm.collectionVariables.set(\"email\", \"{{randomEmailLower}}\");",
+							"}",
+							"",
+							"const myScheme = {",
+							"  \"type\": \"object\",",
+							"  \"properties\": {",
+							"    \"status\": {",
+							"      \"type\": \"string\"",
+							"    },",
+							"    \"data\": {",
+							"      \"type\": \"object\",",
+							"      \"properties\": {",
+							"        \"userId\": {",
+							"          \"type\": \"integer\"",
+							"        },",
+							"        \"photoFilename\": {",
+							"          \"type\": \"string\"",
+							"        },",
+							"        \"distanceUnits\": {",
+							"          \"type\": \"string\"",
+							"        },",
+							"        \"currency\": {",
+							"          \"type\": \"string\"",
+							"        }",
+							"      },",
+							"      \"required\": [",
+							"        \"userId\",",
+							"        \"photoFilename\",",
+							"        \"distanceUnits\",",
+							"        \"currency\"",
+							"      ]",
+							"    }",
+							"  },",
+							"  \"required\": [",
+							"    \"status\",",
+							"    \"data\"",
+							"  ]",
+							"}",
+							"",
+							"",
+							"pm.test(\"Email validation\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    ",
+							"    ",
+							"    if (pm.response.code === 201) {",
+							"        pm.collectionVariables.set('userId',body.data.userId);",
+							"        pm.response.to.have.jsonSchema(myScheme);",
+							"        const email = pm.collectionVariables.get(\"randomEmailLower\");  ",
+							"        const emailRegex = /^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,15}$/;",
+							"        const isValidEmail = emailRegex.test(email);",
+							"        pm.expect(isValidEmail).to.be.true",
+							"        pm.expect(jsonData).to.not.have.property(\"message\");",
+							"    }",
+							"    else{",
+							"        pm.expect(jsonData.message).to.eql(pm.iterationData.get(\"expected_message\"));",
+							"        pm.response.to.have.status(pm.iterationData.get(\"expected_code\"))}",
+							"});",
+							"if (pm.response.code === 400) {",
+							"    pm.execution.setNextRequest(null); ",
+							"}",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{password}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{username}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"{{$randomFirstName}}\",\n    \"lastName\": \"{{$randomLastName}}\",\n    \"email\": \"{{email}}\",\n    \"password\": \"{{userPassword}}\",\n    \"repeatPassword\": \"{{userPassword}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/auth/signup",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Edit profile",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const newName = pm.collectionVariables.replaceIn(\"{{$randomFirstName}}\"); ",
+							"pm.collectionVariables.set(\"firstNameNew\", newName);",
+							"const requestBody = JSON.parse(pm.request.body);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (!pm.iterationData.get(\"name\")) {",
+							"    pm.collectionVariables.set(\"name\", \"{{firstNameNew}}\");",
+							"}",
+							"",
+							"pm.test(\"valid response matches request data\", function () {",
+							"    const requestBody = JSON.parse(pm.request.body);",
+							"    const jsonData = pm.response.json(); ",
+							"    const firstNameRequest = pm.collectionVariables.get(\"firstNameNew\"); ",
+							"",
+							"    if (pm.response.code === 200) {",
+							"        const requestFirst = firstNameRequest;",
+							"        const requestLast = requestBody.lastName;",
+							"        const country = requestBody.country;",
+							"        const dateBirth = requestBody.dateBirth;",
+							"        const jsonData = pm.response.json(); ",
+							"        pm.expect(requestFirst).to.equal(jsonData.data.name);",
+							"        pm.expect(requestLast).to.equal(jsonData.data.lastName);",
+							"        pm.expect(country).to.equal(jsonData.data.country);",
+							"        pm.expect(dateBirth).to.equal(jsonData.data.dateBirth);",
+							"        pm.expect(jsonData.data.photoFilename).to.include(\"png\");",
+							"    }",
+							"    else{",
+							"        pm.expect(jsonData.message).to.be.oneOf(['The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received type number (1)', 'Det første argument skal være af typen streng eller en forekomst af Buffer, ArrayBuffer eller Array eller et Array-lignende objekt. Modtaget typenummer (1)', 'Перший аргумент має бути типу string або екземпляром Buffer, ArrayBuffer або Array або Array-like Object. Номер отриманого типу (1)'])",
+							"    }",
+							"    ",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{userPassword}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{randomEmailLower}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n \"photo\": \"{{image}}\",\n  \"name\": \"{{name}}\",\n  \"lastName\": \"Last\",\n  \"dateBirth\": \"2021-03-17T15:21:05.000Z\",\n  \"country\": \"Ukraine\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/users/profile",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"users",
+						"profile"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Change password",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var newPassword = pm.collectionVariables.replaceIn(\"{{$randomPassword}}\"); ",
+							"pm.collectionVariables.set(\"newPassword\", newPassword);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"response matches request data\", function () {",
+							"    const jsonData = pm.response.json(); ",
+							"    const userIdSignup = pm.collectionVariables.get(\"userId\");  ",
+							"",
+							"    pm.expect(userIdSignup).to.equal(jsonData.data.userId);",
+							"    ",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{userPassword}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{randomEmailLower}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"oldPassword\": \"{{userPassword}}\",\n  \"password\": \"{{newPassword}}\",\n  \"repeatPassword\": \"{{newPassword}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/users/password",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"users",
+						"password"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Logout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json(); ",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    pm.expect(jsonData.status).to.eql('ok');",
+							"",
+							"});",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{newPassword}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{randomEmailLower}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/api/auth/logout",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SignIn",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json(); ",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    pm.expect(jsonData.status).to.eql('ok');",
+							"",
+							"});",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(700);",
+							"});",
+							"pm.test(\"userid is correct\", function () {",
+							"    const jsonData = pm.response.json(); ",
+							"    const userIdSignup = pm.collectionVariables.get(\"userId\");  ",
+							"    pm.expect(userIdSignup).to.equal(jsonData.data.userId);",
+							"",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"{{randomEmailLower}}\",\n  \"password\": \"{{newPassword}}\",\n  \"remember\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/auth/signin",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"signin"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add car",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let body = pm.response.json();",
+							"console.log(body)",
+							"const responseBody = pm.response.json(); ",
+							"pm.collectionVariables.set('carID',body.data.id);",
+							"",
+							"pm.test(\"Created date of car is today\", function () {",
+							"    const createdDateTemp = responseBody.data.carCreatedAt; ",
+							"    const createdDate = new Date(createdDateTemp); ",
+							"    const today = new Date();",
+							"    pm.expect(createdDate.getFullYear()).to.eql(today.getFullYear());",
+							"    pm.expect(createdDate.getMonth()).to.eql(today.getMonth());",
+							"    pm.expect(createdDate.getDate()).to.eql(today.getDate());",
+							"});",
+							"",
+							"pm.test(\"updatedMileage is today\", function () {",
+							"    const updatedMileage = responseBody.data.updatedMileageAt; ",
+							"    const updatedDate = new Date(updatedMileage); ",
+							"    const today = new Date();",
+							"    pm.expect(updatedDate.getFullYear()).to.eql(today.getFullYear());",
+							"    pm.expect(updatedDate.getMonth()).to.eql(today.getMonth());",
+							"    pm.expect(updatedDate.getDate()).to.eql(today.getDate());",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{newPassword}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{randomEmailLower}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"carBrandId\": 1,\n  \"carModelId\": 1,\n  \"mileage\": 1212\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/cars",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"cars"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Car mileage",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{newPassword}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{randomEmailLower}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"carBrandId\": 1,\n  \"carModelId\": 1,\n  \"mileage\": 30000\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/api/cars/{{carID}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"cars",
+						"{{carID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json(); ",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    pm.expect(jsonData.status).to.eql('ok');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{newPassword}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{randomEmailLower}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/api/users",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"api",
+						"users"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "userPassword",
+			"value": "Pass123123!!",
+			"type": "string"
+		},
+		{
+			"key": "userID",
+			"value": ""
+		},
+		{
+			"key": "randomEmailLower",
+			"value": ""
+		},
+		{
+			"key": "newPassword",
+			"value": ""
+		},
+		{
+			"key": "carID",
+			"value": ""
+		},
+		{
+			"key": "userId",
+			"value": ""
+		},
+		{
+			"key": "email",
+			"value": ""
+		},
+		{
+			"key": "name",
+			"value": ""
+		},
+		{
+			"key": "first_name",
+			"value": ""
+		},
+		{
+			"key": "firstName",
+			"value": ""
+		},
+		{
+			"key": "newfirstName",
+			"value": ""
+		},
+		{
+			"key": "firstNameNew",
+			"value": ""
+		}
+	]
+}
