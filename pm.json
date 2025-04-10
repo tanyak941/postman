@@ -5,11 +5,11 @@
   { "email": "notcorrect@domain", "expected_message": "Email is incorrect", "expected_code": 400, "name": "{{firstNameNew}}"},
   { "email": "missin.symbol.com", "expected_message": "Email is incorrect", "expected_code": 400 , "name": "{{firstNameNew}}"},
   { "email": "empty symbo@dot.com", "expected_message": "Email is incorrect", "expected_code": 400, "name": "{{firstNameNew}}"},
-  { "email": "{{randomEmailLower}}", "expected_code": 201, "name": "{{firstNameNew}}"}},
-  { "email": "test@test.com", "expected_message": "User already exists", "expected_code": 400, "name": 8}},
-  { "expected_message": "Email is incorrect", "expected_code": 400, "name": "{{firstNameNew}}" }},
-  { "email": "notcorrect@domain", "expected_message": "Email is incorrect", "expected_code": 400, "name": "{{firstNameNew}}"} },
-  { "email": "missin.symbol.com", "expected_message": "Email is incorrect", "expected_code": 400 , "name": "{{firstNameNew}}"}},
-  { "email": "empty symbo@dot.com", "expected_message": "Email is incorrect", "expected_code": 400, "name": "{{firstNameNew}}"} }
+  { "email": "{{randomEmailLower}}", "expected_code": 201, "name": "{{firstNameNew}}"},
+  { "email": "test@test.com", "expected_message": "User already exists", "expected_code": 400, "name": 8},
+  { "expected_message": "Email is incorrect", "expected_code": 400, "name": "{{firstNameNew}}" },
+  { "email": "notcorrect@domain", "expected_message": "Email is incorrect", "expected_code": 400, "name": "{{firstNameNew}}"},
+  { "email": "missin.symbol.com", "expected_message": "Email is incorrect", "expected_code": 400 , "name": "{{firstNameNew}}"},
+  { "email": "empty symbo@dot.com", "expected_message": "Email is incorrect", "expected_code": 400, "name": "{{firstNameNew}}"}
 
 ]
